@@ -32,13 +32,13 @@ curl --location 'http://127.0.0.1:8000/predict' \
   "back_image_id": "0506b640-ec01-4ead-963b-a11c08fe1c9a",
   "front_texts": {
     "PLACE OF ISSUE": "CE****L",
-    "FULL NAMES": "****INIC ***NA *****RO",
+    "FULL NAMES": "*****NIC ***NA *****RO",
     "GENDER": "MALE",
     "ID NUMBER": "36****80",
     "DATE OF ISSUE": "17.01.***8",
     "SERIAL NUMBER": "24*****57",
     "DISTRICT OF BIRTH": "KA*****A **N",
-    "DATE OF BIRTH": "23.11.1***"
+    "DATE OF BIRTH": "2*.*1.1***"
   },
   "back_texts": {
     "SERIALS MATCH": true,
@@ -76,7 +76,7 @@ curl --location 'http://localhost:8000/cr12' \
 {
   "image_id": "bb1bcee6-5afc-4e77-ad97-987af7dea6c2",
   "detected_texts": {
-    "Company Number": "CPR/ 2014/149365",
+    "Company Number": "CPR/2014/149365",
     "REF Number": "OS-S2FXKJBA",
     "Company Name": "Q-WAYS LIMITED",
     "Name and Description": [
