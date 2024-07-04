@@ -1,0 +1,1 @@
+input your Trained best.pt model for detecting Kenyan ID and CR12 Document
