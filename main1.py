@@ -58,7 +58,7 @@ def extract_and_process_texts(texts, key, word, separator=" "):
     for idx, text in enumerate(texts):
         if word.lower() in text.lower():
             return separator.join(texts[idx + 1:])
-    return "Not available"
+    return separator.join(texts)
 
 def process_image(image_np, image_id, yolo_model, target_classes):
     try:
@@ -171,14 +171,14 @@ async def predict(front_image: UploadFile = File(...), back_image: UploadFile = 
 
         # Extract required texts
         front_result = {
-            "PLACE OF ISSUE": extract_and_process_texts(front_texts.get("Issue_Place", []), "Issue_Place", "SUE"),
-            "FULL NAMES": extract_and_process_texts(front_texts.get("Names", []), "Names", "MES"),
+            "PLACE OF ISSUE": extract_and_process_texts(front_texts.get("Issue_Place", []), "Issue_Place", "SUE", ","),
+            "FULL NAMES": extract_and_process_texts(front_texts.get("Names", []), "Names", "MES", ",") or extract_and_process_texts(front_texts.get("Names", []), "Names", None, ","),
             "GENDER": "FEMALE" if "FEMALE" in front_texts.get("SEX", []) else "MALE",
-            "ID NUMBER": extract_and_process_texts(front_texts.get("ID_No", []), "ID_No", "BER", ""),
-            "DATE OF ISSUE": extract_and_process_texts(front_texts.get("Issue_Date", []), "Issue_Date", "SUE", "."),
-            "SERIAL NUMBER": extract_and_process_texts(front_texts.get("Serial_No", []), "Serial_No", "BER", ""),
-            "DISTRICT OF BIRTH": extract_and_process_texts(front_texts.get("Birth_District", []), "Birth_District", "TH"),
-            "DATE OF BIRTH": extract_and_process_texts(front_texts.get("DOB", []), "DOB", "TH", ".")
+            "ID NUMBER": extract_and_process_texts(front_texts.get("ID_No", []), "ID_No", "BER", ","),
+            "DATE OF ISSUE": extract_and_process_texts(front_texts.get("Issue_Date", []), "Issue_Date", "SUE", ","),
+            "SERIAL NUMBER": extract_and_process_texts(front_texts.get("Serial_No", []), "Serial_No", "BER", ","),
+            "DISTRICT OF BIRTH": extract_and_process_texts(front_texts.get("Birth_District", []), "Birth_District", "TH", ","),
+            "DATE OF BIRTH": extract_and_process_texts(front_texts.get("DOB", []), "DOB", "TH", ",")
         }
 
         serial_number = front_result["SERIAL NUMBER"]
@@ -191,22 +191,18 @@ async def predict(front_image: UploadFile = File(...), back_image: UploadFile = 
             "NAME MATCH": any(full_names in text.replace("<", "") for text in back_texts.get("Bottom_Part", [])),
             "DISTRICT": back_texts.get("ID_Back", [])[1].replace(" ", "") if len(back_texts.get("ID_Back", [])) > 1 else "Not available",
             "DIVISION": back_texts.get("ID_Back", [])[3].replace(" ", "") if len(back_texts.get("ID_Back", [])) > 3 else "Not available",
-            "LOCATION": back_texts.get("ID_Back", [])[5].replace(" ", "") if len(back_texts.get("ID_Back", [])) > 5 else "Not available",
-            "SUB-LOCATION": back_texts.get("ID_Back", [])[7].replace(" ", "") if len(back_texts.get("ID_Back", [])) > 7 else "Not available"
+            "LOCATION": back_texts.get("ID_Back", [])[5].replace(" ", "") if len(back_texts.get("ID_Back", [])) > 5 else "Not available"
         }
 
-        response = {
-            "front_image_id": front_id,
-            "back_image_id": back_id,
-            "front_texts": front_result,
-            "back_texts": back_result
+        result = {
+            "FRONT_IMAGE": front_result,
+            "BACK_IMAGE": back_result
         }
 
-        return JSONResponse(content=response)
-    
+        return JSONResponse(content=result)
     except Exception as e:
-        logger.error(f"Prediction failed: {e}")
-        raise HTTPException(status_code=500, detail="Prediction failed")
+        logger.error(f"Failed to predict: {e}")
+        raise HTTPException(status_code=500, detail="Failed to predict")
 
 @app.post("/cr12")
 async def cr12(pdf_file: UploadFile = File(...)):
